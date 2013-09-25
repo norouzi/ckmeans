@@ -8,12 +8,12 @@ After downloading the datasets, and compiling the mex files, **RUN.m**
 will take you through training and testing of qunatization algorithms,
 which are usefuls for approximate Euclidean nearest neighbor search.
 
-## Compile
+### Compile
 
 From within matlab please run the compile scripts (compile.m) in
 utils/ and search/ sub-directories to build the mex files.
 
-## Datasets
+### Datasets
 
 Download the INRIA bigann datasets (two SIFT datasets and one GIST
 dataset) from http://corpus-texmex.irisa.fr/. Please make sure to
@@ -29,8 +29,8 @@ modify RUN.m to point INRIA_HOME to the root folder it. Unfortunately
 ground-truth nearest neighbor labels are not available for this
 dataset.
 
-## License
+### License
 
-Copyright (c) 2013, Mohammad Norouzi <mohammad.n@gmail.com>. This is a
+Copyright (c) 2013, Mohammad Norouzi \<mohammad.n@gmail.com\>. This is a
 free software; for license information please refer to license.txt
 file.
