@@ -1,8 +1,8 @@
 Cartesian k-means
 =======
 
-An implementation of "*Cartesian k-means, M. Norouzi, D. J. Fleet, CVPR
-2013*".
+An implementation of \"*Cartesian k-means, M. Norouzi, D. J. Fleet, CVPR
+2013*\".
 
 After downloading the datasets, and compiling the mex files, **RUN.m**
 will take you through training and testing of qunatization algorithms,
