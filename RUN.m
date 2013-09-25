@@ -15,19 +15,24 @@ else
   addpath([TINY_HOME, '/mycode']);
 end
 
-if (~exist('dataset_name', 'var'))
+if (~exist('dataset_name', 'var'))  % Can be any of 'sift_1M',
+                                    % 'gist_1M', 'sift_1B',
+                                    % 'gist_80M', 'image_80M'
+% NOTE: 'gist_80M' and 'image_80M' are not fully supported.
   fprintf('"dataset_name" does not exist as a variable, which dataset?.\n');
   return
 end
-if (~exist('model_type', 'var'))
+if (~exist('model_type', 'var'))  % Can be any of 'itq', 'okmeans',
+                                  % 'ckmeans', 'okmeans0', 'ckmeans0'
   fprintf('"model_type" does not exist as a variable, which model?.\n');
   return
 end
-if (~exist('nbits', 'var'))
+if (~exist('nbits', 'var'))  % Number of bits -- should be a
+                             % multiple of 8 for ckmeans
   fprintf('"nbits" does not exist as a variable, how many bits?.\n');
   return
 end
-if (~exist('training', 'var')) 
+if (~exist('training', 'var'))  % 0 or 1 -- whether to do trining or not
   fprintf('"training" does not exist as a variable, are we training?.\n');
   return
 end
@@ -55,22 +60,24 @@ model_file = sprintf('results/%s_%s_%d', dataset_name, model_type, nbits);
 if (training) %% If the models should be trained.
 
 if strcmp(dataset_name, 'sift_1M')
-  dataset = 'ANN_SIFT1M';
   datahome = INRIA_HOME;
   N = 10^6;
 elseif strcmp(dataset_name, 'sift_1B')
-  dataset = 'ANN_SIFT1B';
   datahome = INRIA_HOME;
   nmillion = 1000;
   N = 10^6 * nmillion;
 elseif strcmp(dataset_name, 'gist_1M')
-  dataset = 'ANN_GIST1M';
   datahome = INRIA_HOME;
   N = 10^6;
 elseif strcmp(dataset_name, 'gist_80M')
-  dataset = 'ANN_GIST80M';
-  datahome = INRIA_HOME;
+  datahome = TINY_HOME;
   N = 79*10^6;
+elseif strcmp(dataset_name, 'image_80M')
+  datahome = TINY_HOME;
+  N = 79*10^6;
+else
+  fprintf('dataset not supported.\n');
+  continue;
 end
 
 if strcmp(dataset_name, 'sift_1M')
@@ -84,15 +91,13 @@ elseif strcmp(dataset_name, 'gist_1M')
   Ntraining = 5*10^5;
   trdata = fvecs_read([datahome, '/ANN_GIST1M/gist/gist_learn.fvecs']);
 elseif strcmp(dataset_name, 'gist_80M')
-  trdata = myfvecs_read([datahome, '/ANN_GIST80M/gist/gist_learn.myfvecs']);
+  Ntraining = 10^6;
+  trdata = single(read_tiny_binary_big_core2([datahome, ...
+                    '/tinygist80million.bin'], uint64([1 Ntraining])));
 elseif strcmp(dataset_name, 'image_80M')
   Ntraining = 10^6;
-  nbuffer = 10^6;
   trdata = single(read_tiny_binary_big_core2([datahome, '/tiny_images.bin'], ...
                                              uint64([1 Ntraining])));
-else
-  fprintf('dataset not supported.\n');
-  continue;
 end
 
 if (~exist('Ntraining'))
@@ -101,10 +106,10 @@ else
   assert(size(trdata,2) == Ntraining);
 end
 
-fprintf('trdata loaded, size(trdata) = (%d, %d).\n', ...
+fprintf('trdata loaded, size(trdata) = (%d, %.1e).\n', ...
         size(trdata, 1), size(trdata, 2));
 
-% Train the quantization model on trdata
+%% Train the quantization model on trdata
 
 model = train_model(trdata, dataset_name, model_type, nbits);
 save(model_file, 'model');
@@ -136,9 +141,6 @@ for i=1:floor(N/nbuffer)
     base = b2fvecs_read([datahome, '/ANN_SIFT1B/bigann_base.bvecs'], range);
   elseif strcmp(dataset_name, 'gist_1M')
     base = fvecs_read([datahome, '/ANN_GIST1M/gist/gist_base.fvecs'], range); 
-  elseif strcmp(dataset_name, 'gist_80M')
-    base = myfvecs_read([datahome, '/ANN_GIST1M/gist/gist_base.myfvecs'], ...
-                        range); 
   end
 
   t0 = tic;
@@ -158,8 +160,6 @@ elseif strcmp(dataset_name, 'sift_1B')
   query = b2fvecs_read([datahome, '/ANN_SIFT1B/bigann_query.bvecs']);
 elseif strcmp(dataset_name, 'gist_1M')
   query = fvecs_read([datahome, '/ANN_GIST1M/gist/gist_query.fvecs']);
-elseif strcmp(dataset_name, 'gist_80M')
-  query = myfvecs_read([datahome, '/ANN_GIST80M/gist/gist_query.myfvecs']);
 end
 if (isempty(query))
   queryR = [];
