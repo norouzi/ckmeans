@@ -8,24 +8,36 @@
 % Output:
 %   model: trained model.
 
-function model = train_model(trdata, dataset_name, model_type, nbits)
+function model = train_model(trdata, dataset_name, model_type, nbits, npca)
+
+subspace_bits = 8;  % We assume that each ckmeans' subspaces has 256
+                    % centers. This assumption propagates through our
+                    % quantization and search code too.
+m_ckmeans = nbits / subspace_bits;
 
 % PCA dimensionality reduction as a pre-processing to speed-up
 % training of the quantization methods. NOTE: if model_type is
 % okmeans0 or ckmeans0 no PCA pre-processing is performed.
 
 default_npca_ck = max(384, nbits * 2);
-
 if (strcmp(model_type, 'okmeans') || ...
     strcmp(model_type, 'itq') || ...
     strcmp(model_type, 'ckmeans'))
   mu = mean(trdata, 2);
   if (strcmp(model_type, 'okmeans') || ...
     strcmp(model_type, 'itq'))
-    npca = min(nbits, size(trdata, 1));
+    if (~exist('npca', 'var'))
+      npca = min(nbits, size(trdata, 1));
+    end
   elseif (strcmp(model_type, 'ckmeans'))
-    npca = min(default_npca_ck - mod(default_npca_ck, nbits / 8), ...
-               size(trdata, 1) - mod(size(trdata, 1), nbits / 8));
+    if (~exist('npca', 'var'))
+      npca = min(default_npca_ck - mod(default_npca_ck, m_ckmeans), ...
+                 size(trdata, 1) - mod(size(trdata, 1), m_ckmeans));
+    else
+      if (mod(size(trdata, 1), m_ckmeans) ~= 0)
+        error('npca is not devisible by (nbits / subspace_bits)');
+      end
+    end
   end
   if (npca == size(trdata, 1))
     pc = eye(size(trdata, 1));
@@ -41,25 +53,32 @@ end
 
 if (strcmp(model_type, 'ckmeans') || ...
     strcmp(model_type, 'ckmeans0'))
-  if (strcmp(dataset_name, 'sift_1M') || ...
-      strcmp(dataset_name, 'sift_1B'))
-    ckmeans_init = 'natural';
-  else
-    ckmeans_init = 'random';
+  if (strcmp(model_type, 'ckmeans0') || ...  % If no PCA.
+      npca == size(trdata, 1))
+    if (strcmp(dataset_name, 'sift_1M') || ...
+        strcmp(dataset_name, 'sift_1B'))  % If consecutive
+                                          % partitioning of the
+                                          % dimensions makes sense.
+      ckmeans_init = 'natural';
+    else
+      ckmeans_init = 'random';
+    end
+  else  % If PCA is applied.
+    ckmeans_init = 'distribute';
   end
+  fprintf('ckmeans init: "%s"\n', ckmeans_init);
 end
 
-clear model
 if (strcmp(model_type, 'itq'))
   model = compressITQ(double(trdata2'), nbits, 100);
 elseif (strcmp(model_type, 'okmeans'))
   model = okmeans(trdata2, nbits, 100);
 elseif (strcmp(model_type, 'ckmeans'))
-  model = ckmeans(trdata2, nbits / 8, 256, 100, ckmeans_init);
+  model = ckmeans(trdata2, m_ckmeans, 2 ^ subspace_bits, 100, ckmeans_init);
 elseif (strcmp(model_type, 'okmeans0'))  % No PCA
   model = okmeans(trdata, nbits, 100);
 elseif (strcmp(model_type, 'ckmeans0'))  % No PCA
-  model = ckmeans(trdata, nbits / 8, 256, 100, ckmeans_init);
+  model = ckmeans(trdata, m_ckmeans, 2 ^ subspace_bits, 100, ckmeans_init);
 end
 
 % Revert the effect of PCA dimensionality reduction. This is done to
