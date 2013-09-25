@@ -10,7 +10,6 @@ function [model, C] = compressITQ(X, bit, niter)
 % Yunchao Gong (yunchao@cs.unc.edu)
 %
 
-
 % center the data, VERY IMPORTANT for ITQ to work
 sampleMean = mean(X,1);
 X = (X - repmat(sampleMean,size(X,1),1));
@@ -26,7 +25,13 @@ XX = X*pc;
 % R is the rotation found by ITQ
 [C, R] = ITQ(XX, niter);
 
+% The following lines are added by Mohammad Norouzi.
+
 model.type = 'itq';
 model.mu = sampleMean';
 model.R = pc * R;
+
+% This is our proposal for Asymmetric Hamming distance with
+% ITQ. See the paper for the details.
+
 model.d = mean(mean(abs(XX * R)));
