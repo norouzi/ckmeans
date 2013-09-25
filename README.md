@@ -1,8 +1,8 @@
 Cartesian k-means
 =======
 
-An implementation of \"*Cartesian k-means, M. Norouzi, D. J. Fleet, CVPR
-2013*\".
+An implementation of *Cartesian k-means, M. Norouzi, D. J. Fleet, CVPR
+2013*.
 
 After downloading the datasets, and compiling the mex files, **RUN.m**
 will take you through training and testing of qunatization algorithms,
@@ -19,8 +19,8 @@ Download the INRIA bigann datasets (two SIFT datasets and one GIST
 dataset) from http://corpus-texmex.irisa.fr/. Please make sure to
 modify RUN.m to point INRIA_HOME to the root folder of these
 datasets. INRIA_HOME folder should have the following sub-directories:
-/matlab, which includes the matlab I/O functions, and /ANN_SIFT1M,
-/ANN_GIST1M, and /ANN_SIFT1B, which include the training, and testing
+matlab/, which includes the matlab I/O functions, and ANN_SIFT1M/,
+ANN_GIST1M/, and ANN_SIFT1B/, which include the training, and testing
 sets.
 
 You can also download the Tiny images dataset (80 million GIST
@@ -29,8 +29,11 @@ modify RUN.m to point INRIA_HOME to the root folder it. Unfortunately
 ground-truth nearest neighbor labels are not available for this
 dataset.
 
-### License
+### Contact
 
-Copyright (c) 2013, Mohammad Norouzi \<mohammad.n@gmail.com\>. This is a
-free software; for license information please refer to license.txt
-file.
+Copyright (c) 2013, Mohammad Norouzi \<mohammad.n@gmail.com\>. Please
+don't hesitate to drop me a line for bug reports or general
+comments. Thanks!
+
+This is a free software; for license information please
+refer to license.txt file.
