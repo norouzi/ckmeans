@@ -32,6 +32,6 @@ model.mu = sampleMean';
 model.R = pc * R;
 
 % This is our proposal for Asymmetric Hamming distance with
-% ITQ. See the paper for the details.
+% ITQ. Please see the paper for the details.
 
 model.d = mean(mean(abs(XX * R)));
