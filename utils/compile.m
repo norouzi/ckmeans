@@ -1,0 +1,3 @@
+mex euc_nn_mex.cc CXXFLAGS="\$CXXFLAGS -fopenmp -Wall" ...
+    LDFLAGS="\$LDFLAGS -fopenmp";
+mex kmeans_iter_mex.cc CXXFLAGS="\$CXXFLAGS -Wall"
