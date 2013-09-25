@@ -57,8 +57,6 @@ fprintf('\n');
 
 model_file = sprintf('results/%s_%s_%d', dataset_name, model_type, nbits);
 
-if (training) %% If the models should be trained.
-
 if strcmp(dataset_name, 'sift_1M')
   datahome = INRIA_HOME;
   N = 10^6;
@@ -79,6 +77,8 @@ else
   fprintf('dataset not supported.\n');
   continue;
 end
+
+if (training) %% If the models should be trained.
 
 if strcmp(dataset_name, 'sift_1M')
   Ntraining = 10^5;
@@ -118,11 +118,12 @@ end
 
 if (~training)  %% If a pre-trained model should be loaded for evaluation.
 
-if (~exist('model_file', 'file'))
+if (~exist([model_file, '.mat'], 'file'))
   fprintf('Model file %s does not exist.', model_file);
   return;
 end
 
+fprintf('loading model file (%s).\n', model_file);
 load(model_file, 'model');
 
 end
