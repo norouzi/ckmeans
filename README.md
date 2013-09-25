@@ -7,6 +7,7 @@ An implementation of *Cartesian k-means, M. Norouzi, D. J. Fleet, CVPR
 After downloading the datasets, and compiling the mex files, **RUN.m**
 will take you through training and testing of qunatization algorithms,
 which are useful for approximate Euclidean nearest neighbor search.
+See **demo.m** for a sample run on sift_1M dataset.
 
 ### Compile
 
