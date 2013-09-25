@@ -44,12 +44,23 @@ len1 = cumsum(len);
 
 DB = zeros(size(X), 'single');  % DB stores D*B
 
-if (strcmp(init, 'natural') == 1)
+if (strcmp(init, 'natural'))
   % initialize R by identity matrix
   R = eye(p, p, 'single'); % Default
-elseif (strcmp(init, 'random') == 1)
+elseif (strcmp(init, 'random'))
   % initialize R by random rotation
   [R, S, V] = svd(randn(p, p));
+elseif (strcmp(init, 'distribute'))
+  step = m;
+  if (gcd(p - 1, step) > 1)
+    error('gcd(p - 1, step) > 1');
+  end
+  a = 0:step:(p * step - 1);
+  a = mod(a, p - 1);
+  a(1 + find(a(2:end) == 0)) = p - 1;
+  a = a + 1;
+  R = eye(p, p, 'single'); % Default
+  R = R(a, :)';
 end
 R = single(R);
 model.init = init;
