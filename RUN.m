@@ -12,7 +12,7 @@ end
 if (~exist(TINY_HOME, 'dir'))
   fprintf('"%s" is not a directory.\n', TINY_HOME);
 else
-  addpath([TINY_HOME, '/mycode']);
+  addpath([TINY_HOME, '/code']);
 end
 
 if (~exist('dataset_name', 'var'))  % Can be any of 'sift_1M',
@@ -92,12 +92,12 @@ elseif strcmp(dataset_name, 'gist_1M')
   trdata = fvecs_read([datahome, '/ANN_GIST1M/gist/gist_learn.fvecs']);
 elseif strcmp(dataset_name, 'gist_80M')
   Ntraining = 10^6;
-  trdata = single(read_tiny_binary_big_core2([datahome, ...
-                    '/tinygist80million.bin'], uint64([1 Ntraining])));
+  trdata = single(read_tiny_binary_gist_core([datahome, ...
+                    '/tinygist80million.bin'], uint64([1:Ntraining])));
 elseif strcmp(dataset_name, 'image_80M')
   Ntraining = 10^6;
-  trdata = single(read_tiny_binary_big_core2([datahome, '/tiny_images.bin'], ...
-                                             uint64([1 Ntraining])));
+  trdata = single(read_tiny_binary_big_core([datahome, '/tiny_images.bin'], ...
+                                            uint64([1:Ntraining])));
 end
 
 if (~exist('Ntraining'))
