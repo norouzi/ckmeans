@@ -7,7 +7,9 @@ end
 len0 = 1 + cumsum([0; model.len(1:end-1)]);
 len1 = cumsum(model.len);
 m = model.m;
+n = size(Q, 2);
 
+DB = zeros(sum(model.len), n);
 for (i=1:m)
   DB(len0(i):len1(i), :) = model.centers{i}(:, 1 + uint16(Q(i, :)));
 end
