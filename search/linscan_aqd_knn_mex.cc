@@ -33,8 +33,8 @@ void myAssert(int a, const char *b) {
     mexErrMsgTxt(b);
 }
 
-void mexFunction( int nlhs, mxArray *plhs[], 
-		  int nrhs, const mxArray*prhs[] )    
+void mexFunction(int nlhs, mxArray *plhs[],
+                 int nrhs, const mxArray*prhs[])
 {
   if (nrhs != 6)
     mexErrMsgTxt("Wrong number of inputs\n");

@@ -50,9 +50,12 @@ void linscan_aqd_query(REAL* dists, UINT32* res, UINT8* codes, REAL* centers,
 
   unsigned int i = 0;
 
+  int buffer_size = (int)1e7;
+  int npairs = min(N, buffer_size + K);
+
 #pragma omp parallel shared(i) private(pairs, dis_from_q, pqueries, pres, pdists)
   {
-    pairs = new pair<REAL,UINT32>[N];
+    pairs = new pair<REAL,UINT32>[npairs];
     dis_from_q = new REAL[B_over_8 * (1 << 8)];
 
 #pragma omp for
@@ -61,22 +64,33 @@ void linscan_aqd_query(REAL* dists, UINT32* res, UINT8* codes, REAL* centers,
       pres = res + (UINT64)i * (UINT64)K;
       pdists = dists + (UINT64)i * (UINT64)(K);
 
-      for (int k = 0; k < B_over_8; k++)
+      for (int k = 0; k < B_over_8; k++) {
         for (int r = 0; r < (1 << 8); r++) {
           int t = k * (1 << 8) + r;
           dis_from_q[t] = 0;
           for (int s = 0; s < subdim; s++)
-            dis_from_q[t] += sqr(centers[t * subdim + s] - pqueries[k * subdim + s]);
+            dis_from_q[t] +=
+              sqr(centers[t * subdim + s] - pqueries[k * subdim + s]);
         }
+      }
 
       UINT8 *pcodes = codes;
-      for (int j = 0; j < N; j++, pcodes += dim1codes) {
-        pairs[j].first = 0;
-        for (int k = 0; k < B_over_8; k++)
-          pairs[j].first += dis_from_q[k * (1 << 8) + pcodes[k]];
-        pairs[j].second = j;
+      int from = 0;
+      while (from < N) {
+        int offset = 0;
+        if (from > 0)
+          offset = K;
+        for (int j=0 + offset;
+             j < min(N, from + buffer_size + (K - offset)) - from + offset;
+             j++, pcodes += dim1codes) {
+          pairs[j].first = 0;
+          for (int k = 0; k < B_over_8; k++)
+            pairs[j].first += dis_from_q[k * (1<<8) + pcodes[k]];
+          pairs[j].second = j + from - offset;
+        }
+        from = min(N, from + buffer_size + (K - offset));
+        partial_sort(pairs, pairs + K, pairs + npairs);
       }
-      partial_sort(pairs, pairs + K, pairs + N);
 
       for (int j = 0; j < K; j++) {
         pres[j] = pairs[j].second;
