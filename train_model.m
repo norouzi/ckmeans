@@ -8,12 +8,16 @@
 % Output:
 %   model: trained model.
 
-function model = train_model(trdata, dataset_name, model_type, nbits, npca)
+function model = train_model(trdata, dataset_name, model_type, nbits, ...
+                             npca, niter)
 
 subspace_bits = 8;  % We assume that each ckmeans' subspaces has 256
                     % centers. This assumption propagates through our
                     % quantization and search code too.
 m_ckmeans = nbits / subspace_bits;
+if (~exist('niter', 'var'))
+  niter = 100;
+end
 
 % PCA dimensionality reduction as a pre-processing to speed-up
 % training of the quantization methods. NOTE: if model_type is
@@ -70,15 +74,15 @@ if (strcmp(model_type, 'ckmeans') || ...
 end
 
 if (strcmp(model_type, 'itq'))
-  model = compressITQ(double(trdata2'), nbits, 100);
+  model = compressITQ(double(trdata2'), nbits, niter);
 elseif (strcmp(model_type, 'okmeans'))
-  model = okmeans(trdata2, nbits, 100);
+  model = okmeans(trdata2, nbits, niter);
 elseif (strcmp(model_type, 'ckmeans'))
-  model = ckmeans(trdata2, m_ckmeans, 2 ^ subspace_bits, 100, ckmeans_init);
+  model = ckmeans(trdata2, m_ckmeans, 2 ^ subspace_bits, niter, ckmeans_init);
 elseif (strcmp(model_type, 'okmeans0'))  % No PCA
-  model = okmeans(trdata, nbits, 100);
+  model = okmeans(trdata, nbits, niter);
 elseif (strcmp(model_type, 'ckmeans0'))  % No PCA
-  model = ckmeans(trdata, m_ckmeans, 2 ^ subspace_bits, 100, ckmeans_init);
+  model = ckmeans(trdata, m_ckmeans, 2 ^ subspace_bits, niter, ckmeans_init);
 end
 
 % Revert the effect of PCA dimensionality reduction. This is done to
