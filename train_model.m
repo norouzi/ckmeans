@@ -37,12 +37,14 @@ if (strcmp(model_type, 'okmeans') || ...
     if (~exist('npca', 'var'))
       npca = min(default_npca_ck - mod(default_npca_ck, m_ckmeans), ...
                  size(trdata, 1) - mod(size(trdata, 1), m_ckmeans));
-    else
-      if (mod(size(trdata, 1), m_ckmeans) ~= 0)
-        error('npca is not devisible by (nbits / subspace_bits)');
-      end
     end
   end
+  if (strcmp(model_type, 'ckmeans0'))
+    if (mod(size(trdata, 1), m_ckmeans) ~= 0)
+      error('p (data-point dim) is not devisible by (nbits / subspace_bits)');
+    end
+  end
+
   if (npca == size(trdata, 1))
     pc = eye(size(trdata, 1));
   else
